@@ -11,13 +11,18 @@ BUILD_DIR=_build
 CFLAGS = -g -Wall
 
 # the target to build
-TARGET = example
+TARGET = main
 
 all: $(TARGET)
 
 $(TARGET): $(TARGET).cpp
 	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET) $(TARGET).cpp
+
+run:
+	@printf " --- Running executable ---\n\n"
+	@_build\$(TARGET)
+	@printf "\n\n --- DONE ---"
 
 clean:
 	$(RM) _build
