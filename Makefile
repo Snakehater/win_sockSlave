@@ -16,7 +16,7 @@ TARGET = main
 all: $(TARGET)
 
 $(TARGET): $(TARGET).cpp
-	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
+	[ -d $(BUILD_DIR) ] || mkdir $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET) $(TARGET).cpp
 
 run:
