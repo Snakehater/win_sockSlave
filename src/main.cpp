@@ -1,17 +1,28 @@
 /*
 	Simple udp client
 */
-#include<stdio.h>
-#include<winsock2.h>
+#include <stdio.h>
+#include <winsock2.h>
+
+#include "host_finder.hpp"
 
 //#pragma comment(lib,"ws2_32.lib") //Winsock Library
 
-#define SERVER "192.168.10.146"	//ip address of udp server
 #define BUFLEN 512	//Max length of buffer
-#define PORT 8888	//The port on which to listen for incoming data
+#define PORT 6969	//The port on which to listen for incoming data
+
+std::string hostIP = "";
+
+HostFinder hostFinder;
 
 int main(void)
 {
+no_host:
+	hostIP = "";
+	while (hostIP.length() < 11) { // minimum is xxx.xxx.x.x which is 11 chars
+		hostIP = hostFinder.find(PORT, 10, 0, false);
+	}
+	
 	struct sockaddr_in si_other;
 	int s, slen=sizeof(si_other);
 	char buf[BUFLEN];
@@ -34,11 +45,14 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 	
+	int ReceiveTimeout = 50; 
+	setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&ReceiveTimeout, sizeof(int));
+	
 	//setup address structure
 	memset((char *) &si_other, 0, sizeof(si_other));
 	si_other.sin_family = AF_INET;
 	si_other.sin_port = htons(PORT);
-	si_other.sin_addr.S_un.S_addr = inet_addr(SERVER);
+	si_other.sin_addr.S_un.S_addr = inet_addr(hostIP.c_str());
 	
 	//start communication
 	while(1)
@@ -60,7 +74,13 @@ int main(void)
 		if (recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) == SOCKET_ERROR)
 		{
 			printf("recvfrom() failed with error code : %d" , WSAGetLastError());
-			exit(EXIT_FAILURE);
+			
+			closesocket(s);
+			WSACleanup();
+			
+			goto no_host;
+
+			//exit(EXIT_FAILURE);
 		}
 		
 		puts(buf);

@@ -11,7 +11,7 @@ BUILD_DIR=_build
 CFLAGS = -g -Wall
 
 # linker flags:
-LKFLAGS = -lws2_32 -I./inc
+LKFLAGS = -lws2_32
 
 # the target to build
 TARGET = main
