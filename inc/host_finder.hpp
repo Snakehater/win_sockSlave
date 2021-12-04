@@ -15,12 +15,13 @@ std::string SERVER_PREFIX = "192.168";	// start of ip address of udp server
 class HostFinder {
 	public:
 		HostFinder(){}; // null constructor
-		std::string find(int port, int startPref1, int startPref2, bool cycleFirstPref) {
+		// port - timeout of each connection - start prefix of xxx.xxx.this.xxx - start prefix of xxx.xxx.xxx.this - should we cycle first prefix
+		std::string find(int port, int timeout, int startPref1, int startPref2, bool cycleFirstPref) {
 			std::string hit_addr = "";
 			for (uint16_t i = startPref1; i <= (cycleFirstPref ? 255 : startPref1); i++) {
 				for (uint16_t j = startPref2; j <= 255; j++) {
 					std::string addr = SERVER_PREFIX + '.' + std::to_string(i) + '.' + std::to_string(j);
-//					std::cout << "testing " << addr << std::endl;
+					std::cout << "testing " << addr << std::endl;
 					if (this->ping(addr, port)) {
 						hit_addr = addr;
 						goto hit;
@@ -31,7 +32,7 @@ class HostFinder {
 			return hit_addr;
 		}
 	private:
-		bool ping(std::string server_addr, int port) {
+		bool ping(std::string server_addr, int port, int receiveTimeout = 50) {
 			struct sockaddr_in si_other;
 			int s, slen=sizeof(si_other);
 			char buf[BUFLEN];
@@ -55,8 +56,7 @@ class HostFinder {
 				//exit(EXIT_FAILURE);
 			}
 			
-			int ReceiveTimeout = 50; 
-			setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&ReceiveTimeout, sizeof(int));
+			setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&receiveTimeout, sizeof(int));
 			
 			//setup address structure
 			memset((char *) &si_other, 0, sizeof(si_other));
@@ -87,7 +87,6 @@ class HostFinder {
 			
 			closesocket(s);
 			WSACleanup();
-			
 			if (strcmp(buf, "ACK") == 0)
 				return true;
 			else

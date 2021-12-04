@@ -20,7 +20,7 @@ int main(void)
 no_host:
 	hostIP = "";
 	while (hostIP.length() < 11) { // minimum is xxx.xxx.x.x which is 11 chars
-		hostIP = hostFinder.find(PORT, 10, 0, false);
+		hostIP = hostFinder.find(PORT, 50, 10, 0, false);
 	}
 	
 	struct sockaddr_in si_other;
