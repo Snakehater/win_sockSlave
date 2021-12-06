@@ -33,7 +33,7 @@ int s, slen=sizeof(si_other);
 char buf[BUFLEN];
 char message[BUFLEN];
 
-int main(int argc, _TCHAR* argv[])
+int main()
 {
 	FreeConsole();
 no_host:
