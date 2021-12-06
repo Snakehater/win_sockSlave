@@ -2,14 +2,13 @@
 	Simple udp client
 */
 #include <stdio.h>
-#include <iostream>
+//#include <iostream>
 #include <winsock2.h>
 #include <string>
 
 //#pragma comment(lib,"ws2_32.lib") //Winsock Library
 
 std::string SERVER_PREFIX = "192.168";	// start of ip address of udp server
-#define BUFLEN 512	//Max length of buffer
 #define PING_CMD "PING"
 
 class HostFinder {
@@ -18,10 +17,10 @@ class HostFinder {
 		// port - timeout of each connection - start prefix of xxx.xxx.this.xxx - start prefix of xxx.xxx.xxx.this - should we cycle first prefix
 		std::string find(int port, int timeout, int startPref1, int startPref2, bool cycleFirstPref) {
 			std::string hit_addr = "";
-			for (uint16_t i = startPref1; i <= (cycleFirstPref ? 255 : startPref1); i++) {
-				for (uint16_t j = startPref2; j <= 255; j++) {
+			for (uint16_t i = startPref1; i <= (cycleFirstPref ? 254 : startPref1); i++) {
+				for (uint16_t j = startPref2; j <= 254; j++) {
 					std::string addr = SERVER_PREFIX + '.' + std::to_string(i) + '.' + std::to_string(j);
-					std::cout << "testing " << addr << std::endl;
+//					std::cout << "testing " << addr << std::endl;
 					if (this->ping(addr, port)) {
 						hit_addr = addr;
 						goto hit;
