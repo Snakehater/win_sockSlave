@@ -15,9 +15,9 @@ class HostFinder {
 	public:
 		HostFinder(){}; // null constructor
 		// port - timeout of each connection - start prefix of xxx.xxx.this.xxx - start prefix of xxx.xxx.xxx.this - should we cycle first prefix
-		std::string find(int port, int timeout, int startPref1, int startPref2, bool cycleFirstPref) {
+		std::string find(int port, int timeout, int startPref1, int pref1Range, int startPref2) {
 			std::string hit_addr = "";
-			for (uint16_t i = startPref1; i <= (cycleFirstPref ? 254 : startPref1); i++) {
+			for (uint16_t i = startPref1; i <= startPref1 + pref1Range; i++) {
 				for (uint16_t j = startPref2; j <= 254; j++) {
 					std::string addr = SERVER_PREFIX + '.' + std::to_string(i) + '.' + std::to_string(j);
 //					std::cout << "testing " << addr << std::endl;
@@ -46,7 +46,7 @@ class HostFinder {
 //				exit(EXIT_FAILURE);
 			}
 			//printf("Initialised.\n");
-			
+
 			//create socket
 			if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR)
 			{
@@ -54,17 +54,17 @@ class HostFinder {
 				return false;
 				//exit(EXIT_FAILURE);
 			}
-			
+
 			setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&receiveTimeout, sizeof(int));
-			
+
 			//setup address structure
 			memset((char *) &si_other, 0, sizeof(si_other));
 			si_other.sin_family = AF_INET;
 			si_other.sin_port = htons(port);
 			si_other.sin_addr.S_un.S_addr = inet_addr(server_addr.c_str());
-			
+
 			//start communication
-			
+
 			//send the message
 			if (sendto(s, message, strlen(message) , 0 , (struct sockaddr *) &si_other, slen) == SOCKET_ERROR)
 			{
@@ -72,7 +72,7 @@ class HostFinder {
 				return false;
 				//exit(EXIT_FAILURE);
 			}
-			
+
 			//receive a reply and print it
 			//clear the buffer by filling null, it might have previously received data
 			memset(buf,'\0', BUFLEN);
@@ -83,7 +83,7 @@ class HostFinder {
 				return false;
 				//exit(EXIT_FAILURE);
 			}
-			
+
 			closesocket(s);
 			WSACleanup();
 			if (strcmp(buf, "ACK") == 0)
@@ -98,4 +98,3 @@ class HostFinder {
 	std::cout << hostFinder.find(6969, 10, 0, false);
 	return 0;
 }*/
-

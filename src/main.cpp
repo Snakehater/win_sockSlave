@@ -39,9 +39,9 @@ int main()
 no_host:
 	hostIP = "";
 	while (hostIP.length() < 11) { // minimum is xxx.xxx.x.x which is 11 chars
-		hostIP = hostFinder.find(PORT, 50, 10, 140, false);
+		hostIP = hostFinder.find(PORT, 50, 190, 10, 0);
 	}
-	
+
 	WSADATA wsa;
 
 	//Initialise winsock
@@ -52,7 +52,7 @@ no_host:
 		exit(EXIT_FAILURE);
 	}
 //	printf("Initialised.\n");
-	
+
 	//create socket
 	if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR)
 	{
@@ -60,27 +60,27 @@ no_host:
 //		exit(EXIT_FAILURE);
 		goto no_host;
 	}
-	
-	int ReceiveTimeout = 50; 
+
+	int ReceiveTimeout = 500;
 	setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char*)&ReceiveTimeout, sizeof(int));
 	setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (char*)&ReceiveTimeout, sizeof(int));
-	
+
 	//setup address structure
 	memset((char *) &si_other, 0, sizeof(si_other));
 	si_other.sin_family = AF_INET;
 	si_other.sin_port = htons(PORT);
 	si_other.sin_addr.S_un.S_addr = inet_addr(hostIP.c_str());
-	
+
 	strcpy(message, "HELLO ");
 	strncpy(&message[0] + 6, getUsername().c_str(), BUFLEN-6);
-	
+
 replay_hello:
 	sendto(s, message, strlen(message), 0, (struct sockaddr *) &si_other, slen);
 	memset(buf, '\0', BUFLEN);
 	recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen);
-	if (strcmp(buf, "ACK:HELLO") != 0) 
+	if (strcmp(buf, "ACK:HELLO") != 0)
 		goto replay_hello;
-	
+
 	//start communication
 	while(1)
 	{
@@ -89,15 +89,15 @@ replay_hello:
 		if (sendto(s, message, strlen(message) , 0 , (struct sockaddr *) &si_other, slen) == SOCKET_ERROR)
 		{
 //			printf("sendto() failed with error code : %d" , WSAGetLastError());
-			
+
 			closesocket(s);
 			WSACleanup();
-			
+
 			goto no_host;
-			
+
 			//exit(EXIT_FAILURE);
 		}
-		
+
 		//receive a reply and print it
 		//clear the buffer by filling null, it might have previously received data
 		memset(buf,'\0', BUFLEN);
@@ -105,10 +105,10 @@ replay_hello:
 		if (recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) == SOCKET_ERROR)
 		{
 //			printf("recvfrom() failed with error code : %d" , WSAGetLastError());
-			
+
 			closesocket(s);
 			WSACleanup();
-			
+
 			goto no_host;
 
 			//exit(EXIT_FAILURE);
@@ -138,7 +138,7 @@ replay_forceACK:
 	sendto(s, message, strlen(message), 0, (struct sockaddr *) &si_other, slen);
 	memset(buf, '\0', BUFLEN);
 	recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen);
-	if (strcmp(buf, "ACK") != 0) 
+	if (strcmp(buf, "ACK") != 0)
 		goto replay_forceACK;
 }
 
@@ -161,7 +161,7 @@ TCHAR infoBuf[INFO_BUFFER_SIZE];
 DWORD bufCharCount = INFO_BUFFER_SIZE;
 
 std::string getUsername() {
-	
+
 	// Get and display the user name.
 	if( !GetUserName( infoBuf, &bufCharCount ) )
 		strcpy(infoBuf, "Unknown");
